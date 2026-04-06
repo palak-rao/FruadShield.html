@@ -1,0 +1,943 @@
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0D0618;--bg2:#130920;--bg3:#1A0D2E;--bg4:#221140;
+--card:#160B28;--card2:#1E1038;--card3:#0A0412;
+--p:#9B6DFF;--p2:#7C4FE0;--p3:#B48CFF;--p4:#C9AEFF;--p5:#E0D0FF;
+--lav:#EAE0FF;--lav2:#F5F0FF;
+--danger:#E05555;--danger2:#A03030;--danger3:#3A1010;
+--success:#3DB882;--success2:#1A5C40;
+--warn:#C9881A;--warn2:#5C3800;
+--txt:#EEE6FF;--txt2:#B89FE8;--txt3:#6B4F9C;
+--border:rgba(180,140,255,0.12);--border2:rgba(180,140,255,0.25);--border3:rgba(180,140,255,0.45);
+--accent1:#7B3FF5;--accent2:#A855F7;--white:#FFFFFF;
+--radius:16px;--radius2:11px;--radius3:7px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;min-height:100vh}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideR{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(155,109,255,.45)}50%{box-shadow:0 0 0 8px rgba(155,109,255,0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes scan{0%{top:-2px}100%{top:100%}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.au{animation:fadeUp .4s ease forwards}
+.au2{animation:fadeUp .4s .08s ease both}
+.au3{animation:fadeUp .4s .16s ease both}
+input,textarea,select{background:var(--card2);border:1px solid var(--border2);color:var(--txt);border-radius:var(--radius2);padding:10px 13px;font-size:13px;width:100%;outline:none;transition:border .18s,box-shadow .18s;font-family:inherit}
+input:focus,textarea:focus,select:focus{border-color:var(--p3);box-shadow:0 0 0 3px rgba(155,109,255,.13)}
+input::placeholder{color:var(--txt3)}
+select option{background:var(--card2)}
+button{cursor:pointer;border:none;border-radius:var(--radius2);padding:10px 20px;font-size:13px;font-weight:600;transition:all .16s;font-family:inherit}
+.bp{background:var(--p);color:#fff}
+.bp:hover{background:var(--p2);transform:translateY(-1px)}
+.bo{background:transparent;border:1px solid var(--border2);color:var(--txt2)}
+.bo:hover{background:var(--card2);border-color:var(--p3)}
+.bd{background:var(--danger);color:#fff}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.td{background:var(--danger3);color:#FFAAAA;border:1px solid rgba(224,85,85,.35)}
+.ts{background:#3A2500;color:#FFD070;border:1px solid rgba(201,136,26,.35)}
+.tg{background:#0D3025;color:#5DEDB5;border:1px solid rgba(61,184,130,.35)}
+.tp{background:var(--card2);color:var(--p4);border:1px solid var(--border2)}
+.tw{background:#3A1500;color:#FFAA70;border:1px solid rgba(224,130,85,.35)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border .18s}
+.card:hover{border-color:var(--border2)}
+.scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(180,140,255,.25),transparent);animation:scan 5s linear infinite;pointer-events:none;z-index:2}
+.toast-wrap{position:absolute;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:6px}
+.toast{background:var(--card3);border:1px solid var(--border3);border-radius:var(--radius2);padding:10px 14px;font-size:12px;color:var(--txt);min-width:250px;animation:slideR .25s ease;display:flex;align-items:center;gap:8px}
+.toast.success{border-left:3px solid var(--success)}
+.toast.error{border-left:3px solid var(--danger)}
+.toast.info{border-left:3px solid var(--p3)}
+
+.page{display:none;min-height:100vh;width:100%}
+.page.active{display:flex}
+
+.auth-page{flex-direction:row;min-height:100vh}
+.auth-l{flex:1;background:var(--bg2);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:48px 32px;position:relative;overflow:hidden}
+.auth-grid{position:absolute;inset:0;opacity:.03;background-image:linear-gradient(var(--p3) 1px,transparent 1px),linear-gradient(90deg,var(--p3) 1px,transparent 1px);background-size:40px 40px}
+.auth-r{width:440px;display:flex;flex-direction:column;justify-content:center;padding:48px 40px;background:var(--bg);overflow-y:auto}
+.logo-row{display:flex;align-items:center;gap:9px;margin-bottom:40px;z-index:1}
+.logo-sq{width:40px;height:40px;background:var(--p);border-radius:11px;display:flex;align-items:center;justify-content:center}
+.logo-nm{font-size:18px;font-weight:700;color:var(--white)}
+.auth-orb{width:150px;height:150px;border-radius:50%;border:1px solid rgba(180,140,255,.18);display:flex;align-items:center;justify-content:center;position:relative;margin:0 auto 20px;animation:float 4s ease-in-out infinite;z-index:1}
+.auth-orb-in{width:100px;height:100px;background:rgba(155,109,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(180,140,255,.15)}
+.flabel{display:block;font-size:11px;font-weight:700;color:var(--txt3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.6px}
+.fgroup{margin-bottom:13px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fdivider{display:flex;align-items:center;gap:8px;margin:14px 0;color:var(--txt3);font-size:11px}
+.fdivider::before,.fdivider::after{content:'';flex:1;height:1px;background:var(--border)}
+.sw{text-align:center;margin-top:16px;font-size:13px;color:var(--txt3)}
+.sw span{color:var(--p3);font-weight:600;cursor:pointer}
+.inp-wrap{position:relative}
+.eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--txt3);padding:3px;width:auto;cursor:pointer}
+.str-bar{height:3px;border-radius:2px;background:var(--bg3);margin-top:5px;overflow:hidden}
+.str-fill{height:100%;border-radius:2px;transition:width .3s,background .3s}
+
+.sidebar{width:225px;background:var(--card3);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:8px;padding:18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-sq{width:30px;height:30px;background:var(--p);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo-txt{font-size:13px;font-weight:700;color:var(--white)}
+.sb-ver{font-size:9px;padding:2px 5px;background:rgba(155,109,255,.2);color:var(--p5);border-radius:8px;margin-left:3px}
+.nav-sec{padding:12px 8px 4px}
+.nav-lbl{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.7px;padding:0 6px;margin-bottom:4px}
+.ni{display:flex;align-items:center;gap:8px;padding:8px 9px;border-radius:var(--radius3);color:var(--txt3);font-size:12px;font-weight:500;transition:all .16s;margin-bottom:1px;cursor:pointer}
+.ni:hover{background:rgba(180,140,255,.07);color:var(--txt2)}
+.ni.act{background:rgba(155,109,255,.18);color:var(--p5)}
+.ni-ico{width:14px;height:14px;flex-shrink:0}
+.nbadge{margin-left:auto;background:var(--danger);color:#fff;font-size:9px;padding:1px 5px;border-radius:7px;font-weight:700}
+.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid var(--border)}
+.uav{width:28px;height:28px;background:var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.un{font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ur{font-size:10px;color:var(--txt3)}
+.lb{background:none;border:none;color:var(--txt3);padding:3px;border-radius:4px;width:auto;cursor:pointer}
+.lb:hover{color:var(--danger)}
+
+.main-layout{display:flex;flex:1;overflow:hidden;min-height:100vh}
+.main-c{flex:1;overflow-y:auto;padding:22px 26px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.topbar h1{font-size:19px;font-weight:700;color:var(--white)}
+.topbar p{font-size:11px;color:var(--txt3);margin-top:2px}
+.topbar-r{display:flex;align-items:center;gap:9px}
+.nbtn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:7px 9px;color:var(--txt3);display:flex;align-items:center;position:relative;cursor:pointer}
+.ndot{position:absolute;top:5px;right:5px;width:6px;height:6px;background:var(--danger);border-radius:50%;border:2px solid var(--bg)}
+.live-pill{background:rgba(61,184,130,.12);border:1px solid rgba(61,184,130,.25);border-radius:20px;padding:4px 11px;font-size:11px;color:#5DEDB5;display:flex;align-items:center;gap:5px;font-weight:600}
+.live-dot{width:5px;height:5px;background:#3DB882;border-radius:50%;animation:pulse 2s infinite}
+
+.ticker-bar{background:var(--card3);border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden;white-space:nowrap}
+.ticker-inner{display:inline-flex;gap:40px;animation:ticker 30s linear infinite}
+.ticker-item{font-size:11px;color:var(--txt3);display:inline-flex;align-items:center;gap:6px}
+.ticker-item span{color:var(--p4);font-weight:600}
+.ticker-item.danger span{color:#FFAAAA}
+.ticker-item.ok span{color:#5DEDB5}
+
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:18px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:17px;transition:all .18s;animation:fadeUp .4s ease forwards}
+.sc:hover{border-color:var(--border2);transform:translateY(-2px)}
+.sc-lbl{font-size:11px;color:var(--txt3);margin-bottom:3px}
+.sc-val{font-size:22px;font-weight:700}
+.sc-ch{font-size:11px;margin-top:3px}
+.sc-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.up{color:#5DEDB5}.dn{color:#FF8888}
+
+.gc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:relative}
+.gh{display:flex;align-items:center;justify-content:space-between;padding:13px 17px;border-bottom:1px solid var(--border)}
+.gh h3{font-size:13px;font-weight:600;color:var(--white)}
+.gtb{display:flex;gap:5px}
+.tbtn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius3);padding:4px 10px;color:var(--txt3);font-size:11px;font-weight:600;transition:all .16s;cursor:pointer}
+.tbtn:hover,.tbtn.act{background:rgba(155,109,255,.18);border-color:var(--p3);color:var(--p3)}
+.gleg{display:flex;gap:12px;padding:9px 17px;border-top:1px solid var(--border);flex-wrap:wrap}
+.gli{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt3)}
+.gld{width:8px;height:8px;border-radius:50%}
+
+.al-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--card3);border:1px solid var(--border);border-radius:var(--radius2);margin-bottom:7px;animation:slideR .3s ease forwards}
+.al-item.critical{border-left:3px solid var(--danger);background:#160610}
+.al-item.warning{border-left:3px solid var(--warn);background:#180E00}
+.al-item.info{border-left:3px solid var(--p3);background:#10072A}
+.al-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px;animation:blink 1.4s infinite}
+.al-dot.critical{background:var(--danger)}
+.al-dot.warning{background:var(--warn)}
+.al-dot.info{background:var(--p3)}
+.al-title{font-size:12px;font-weight:600;color:var(--white);margin-bottom:2px}
+.al-desc{font-size:11px;color:var(--txt2);line-height:1.5}
+
+.tw-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{padding:8px 12px;text-align:left;color:var(--txt3);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid rgba(180,140,255,.04);transition:background .1s}
+tbody tr:hover{background:rgba(180,140,255,.04)}
+tbody td{padding:10px 12px;color:var(--txt2)}
+tbody td:first-child{color:var(--white);font-weight:500}
+
+.two-col{display:grid;grid-template-columns:1fr 320px;gap:16px;margin-bottom:18px}
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.page-hdr h2{font-size:17px;font-weight:700;color:var(--white)}
+
+.ugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.ucard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .18s}
+.ucard:hover{border-color:var(--border2);transform:translateY(-2px)}
+.ucard-top{padding:16px 16px 13px;border-bottom:1px solid var(--border)}
+.ucard-av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
+.ucard-body{padding:13px 16px}
+.ucard-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(180,140,255,.05)}
+.ucard-row:last-child{border-bottom:none}
+.ucard-key{font-size:11px;color:var(--txt3)}
+.ucard-val{font-size:11px;color:var(--txt);font-weight:500;text-align:right;font-family:monospace}
+.ucard-foot{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:7px;justify-content:space-between}
+
+.agrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px}
+.ccrd{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:17px}
+.ccrd h3{font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:12px}
+
+.set-layout{display:grid;grid-template-columns:180px 1fr;gap:14px}
+.set-nav{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:9px;height:fit-content}
+.sni{padding:7px 10px;border-radius:var(--radius3);font-size:12px;color:var(--txt3);transition:all .16s;display:flex;align-items:center;gap:6px;font-weight:500;cursor:pointer}
+.sni:hover,.sni.act{background:rgba(155,109,255,.14);color:var(--p4)}
+.set-con{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px}
+.ss{margin-bottom:22px}
+.ss h3{font-size:13px;font-weight:600;color:var(--white);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(180,140,255,.04)}
+.sr:last-child{border-bottom:none}
+.sr-info strong{display:block;font-size:12px;font-weight:500;color:var(--txt);margin-bottom:1px}
+.sr-info span{font-size:11px;color:var(--txt3)}
+.tog{width:36px;height:19px;background:var(--bg3);border-radius:10px;position:relative;transition:background .18s;border:1px solid var(--border2);flex-shrink:0;cursor:pointer}
+.tog.on{background:var(--p)}
+.tog::after{content:'';position:absolute;width:13px;height:13px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .16s}
+.tog.on::after{left:19px}
+
+.modal-bg{display:none;position:absolute;inset:0;background:rgba(5,2,14,.88);z-index:1000;align-items:center;justify-content:center;min-height:600px}
+.modal-bg.open{display:flex}
+.modal{background:var(--card2);border:1px solid var(--border3);border-radius:var(--radius);width:580px;max-height:86vh;overflow-y:auto;padding:26px}
+.modal h2{font-size:17px;font-weight:700;color:var(--white);margin-bottom:3px}
+.modal-sub{font-size:11px;color:var(--txt3);margin-bottom:20px}
+.ms-title{font-size:10px;font-weight:700;color:var(--p4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:11px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.ms{margin-bottom:18px}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.two-col-f{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+.risk-mini{display:inline-block;width:60px;height:4px;background:var(--bg3);border-radius:2px;vertical-align:middle}
+.risk-fill{height:100%;border-radius:2px;display:block}
+
+.pulse-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.pulse-badge.live{background:rgba(61,184,130,.12);border:1px solid rgba(61,184,130,.25);color:#5DEDB5}
+.pulse-badge.alert{background:rgba(224,85,85,.12);border:1px solid rgba(224,85,85,.25);color:#FFAAAA}
+.pulse-badge.watch{background:rgba(201,136,26,.12);border:1px solid rgba(201,136,26,.25);color:#FFD070}
+
+.heatmap-cell{display:inline-block;border-radius:3px;transition:opacity .2s}
+.heatmap-cell:hover{opacity:.7}
+
+.filter-bar{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filter-bar input,.filter-bar select{max-width:190px}
+</style>
+
+<div id="app-wrap" style="position:relative;min-height:100vh;background:var(--bg)">
+<div class="toast-wrap" id="toasts"></div>
+
+<div class="modal-bg" id="addUserModal">
+<div class="modal au">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+    <h2>Register new client</h2>
+    <button class="bo" style="padding:5px 9px;font-size:17px" onclick="closeModal()">×</button>
+  </div>
+  <div class="modal-sub">All starred fields required — data synced to TigerGraph schema</div>
+  <div class="ms"><div class="ms-title">Personal information</div>
+    <div class="three-col" style="margin-bottom:9px">
+      <div class="fgroup"><label class="flabel">First name *</label><input type="text" id="m-fn" placeholder="Riya"></div>
+      <div class="fgroup"><label class="flabel">Last name *</label><input type="text" id="m-ln" placeholder="Sharma"></div>
+      <div class="fgroup"><label class="flabel">Date of birth</label><input type="date" id="m-dob"></div>
+    </div>
+    <div class="two-col-f" style="margin-bottom:9px">
+      <div class="fgroup"><label class="flabel">Email *</label><input type="email" id="m-em" placeholder="riya@email.com"></div>
+      <div class="fgroup"><label class="flabel">Phone *</label><input type="tel" id="m-ph" placeholder="+91 98765 43210"></div>
+    </div>
+    <div class="fgroup"><label class="flabel">Address</label><input type="text" id="m-addr" placeholder="Flat No, Street, City, State, PIN"></div>
+  </div>
+  <div class="ms"><div class="ms-title">Identity & KYC</div>
+    <div class="three-col" style="margin-bottom:9px">
+      <div class="fgroup"><label class="flabel">PAN *</label><input type="text" id="m-pan" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase"></div>
+      <div class="fgroup"><label class="flabel">Aadhaar</label><input type="text" id="m-aadh" placeholder="XXXX XXXX XXXX" maxlength="14"></div>
+      <div class="fgroup"><label class="flabel">Passport</label><input type="text" id="m-pass" placeholder="A1234567"></div>
+    </div>
+    <div class="two-col-f">
+      <div class="fgroup"><label class="flabel">KYC status</label><select id="m-kyc"><option value="verified">Verified</option><option value="pending">Pending</option><option value="rejected">Rejected</option></select></div>
+      <div class="fgroup"><label class="flabel">Nationality</label><input type="text" id="m-nat" placeholder="Indian" value="Indian"></div>
+    </div>
+  </div>
+  <div class="ms"><div class="ms-title">Bank account details</div>
+    <div class="two-col-f" style="margin-bottom:9px">
+      <div class="fgroup"><label class="flabel">Account number *</label><input type="text" id="m-acc" placeholder="1234 5678 9012 3456" maxlength="19"></div>
+      <div class="fgroup"><label class="flabel">Confirm account no.</label><input type="text" id="m-acc2" placeholder="Re-enter" maxlength="19"></div>
+    </div>
+    <div class="three-col" style="margin-bottom:9px">
+      <div class="fgroup"><label class="flabel">IFSC *</label><input type="text" id="m-ifsc" placeholder="HDFC0001234" maxlength="11" style="text-transform:uppercase"></div>
+      <div class="fgroup"><label class="flabel">Bank name *</label><input type="text" id="m-bank" placeholder="HDFC Bank"></div>
+      <div class="fgroup"><label class="flabel">Branch</label><input type="text" id="m-branch" placeholder="Connaught Place"></div>
+    </div>
+    <div class="two-col-f">
+      <div class="fgroup"><label class="flabel">Account type</label><select id="m-atype"><option>Savings</option><option>Current</option><option>Fixed Deposit</option><option>NRI</option></select></div>
+      <div class="fgroup"><label class="flabel">MICR code</label><input type="text" id="m-micr" placeholder="110240001" maxlength="9"></div>
+    </div>
+  </div>
+  <div class="ms"><div class="ms-title">Device & security</div>
+    <div class="three-col" style="margin-bottom:9px">
+      <div class="fgroup"><label class="flabel">Device ID</label><input type="text" id="m-dev" placeholder="iOS-A1B2C3D4"></div>
+      <div class="fgroup"><label class="flabel">IP address</label><input type="text" id="m-ip" placeholder="103.25.146.20"></div>
+      <div class="fgroup"><label class="flabel">Risk tier</label><select id="m-risk"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
+    </div>
+    <div class="fgroup"><label class="flabel">Notes</label><textarea id="m-notes" rows="2" placeholder="Additional remarks..."></textarea></div>
+  </div>
+  <div style="display:flex;gap:9px;justify-content:flex-end">
+    <button class="bo" onclick="closeModal()">Cancel</button>
+    <button class="bp" onclick="submitUser()">Register client</button>
+  </div>
+</div>
+</div>
+
+<div class="page auth-page active" id="page-signin">
+  <div class="auth-l">
+    <div class="auth-grid"></div>
+    <div class="logo-row"><div class="logo-sq"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div><span class="logo-nm">FraudShield</span></div>
+    <div class="auth-orb"><div class="auth-orb-in"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg></div></div>
+    <div style="text-align:center;z-index:1;margin-bottom:24px">
+      <div style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:5px">Graph-powered fraud intelligence</div>
+      <div style="font-size:12px;color:var(--txt3);max-width:230px;line-height:1.6;margin:0 auto">TigerGraph neural network monitoring — real-time, multi-hop detection</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:260px;z-index:1">
+      <div style="display:flex;align-items:center;gap:9px;background:rgba(155,109,255,.07);border:1px solid var(--border);border-radius:var(--radius2);padding:8px 12px"><div style="width:6px;height:6px;background:var(--p3);border-radius:50%;animation:pulse 2s infinite;flex-shrink:0"></div><span style="font-size:11px;color:var(--txt2)">Cycle detection (3+ hop)</span></div>
+      <div style="display:flex;align-items:center;gap:9px;background:rgba(155,109,255,.07);border:1px solid var(--border);border-radius:var(--radius2);padding:8px 12px"><div style="width:6px;height:6px;background:var(--p3);border-radius:50%;animation:pulse 2s .3s infinite;flex-shrink:0"></div><span style="font-size:11px;color:var(--txt2)">Real-time device + IP tracking</span></div>
+      <div style="display:flex;align-items:center;gap:9px;background:rgba(155,109,255,.07);border:1px solid var(--border);border-radius:var(--radius2);padding:8px 12px"><div style="width:6px;height:6px;background:var(--p3);border-radius:50%;animation:pulse 2s .6s infinite;flex-shrink:0"></div><span style="font-size:11px;color:var(--txt2)">IFSC & account anomaly alerts</span></div>
+      <div style="display:flex;align-items:center;gap:9px;background:rgba(155,109,255,.07);border:1px solid var(--border);border-radius:var(--radius2);padding:8px 12px"><div style="width:6px;height:6px;background:#5DEDB5;border-radius:50%;animation:pulse 2s .9s infinite;flex-shrink:0"></div><span style="font-size:11px;color:var(--txt2)">AI risk scoring engine</span></div>
+    </div>
+  </div>
+  <div class="auth-r">
+    <div class="au" style="margin-bottom:26px"><h2 style="font-size:22px;font-weight:700;color:var(--white)">Welcome back</h2><p style="font-size:12px;color:var(--txt3);margin-top:3px">Sign in to FraudShield console</p></div>
+    <div class="au2">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:9px;background:var(--card);border:1px solid var(--border2);border-radius:var(--radius2);color:var(--txt2);font-size:13px;margin-bottom:7px;cursor:pointer" onclick="toast('Google auth not configured','info')"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Continue with Google</div>
+      <div class="fdivider">or continue with email</div>
+      <div class="fgroup"><label class="flabel">Email</label><input type="email" id="si-e" value="admin@fraudshield.io" placeholder="you@company.com"></div>
+      <div class="fgroup"><label class="flabel">Password</label><div class="inp-wrap"><input type="password" id="si-p" value="password123" placeholder="••••••••"><button class="eye-btn" onclick="tp('si-p')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--txt3);cursor:pointer"><input type="checkbox" checked style="width:auto"> Remember me</label>
+        <span style="font-size:12px;color:var(--p3);cursor:pointer" onclick="toast('Reset link sent','success')">Forgot password?</span>
+      </div>
+      <button class="bp" style="width:100%;padding:12px;font-size:14px" onclick="doSignIn()">Sign in</button>
+    </div>
+    <div class="sw au3">No account? <span onclick="gp('signup')">Create one</span></div>
+  </div>
+</div>
+
+<div class="page auth-page" id="page-signup">
+  <div class="auth-l">
+    <div class="auth-grid"></div>
+    <div class="logo-row"><div class="logo-sq"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div><span class="logo-nm">FraudShield</span></div>
+    <div style="width:72px;height:72px;background:rgba(155,109,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border:1px solid rgba(180,140,255,.18);animation:float 4s ease-in-out infinite;z-index:1"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="1.5"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+    <div style="text-align:center;z-index:1;margin-bottom:24px"><div style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:5px">Join FraudShield</div><div style="font-size:12px;color:var(--txt3);max-width:220px;line-height:1.6;margin:0 auto">Intelligent graph-based detection for modern fintech</div></div>
+    <div style="display:flex;flex-direction:column;gap:7px;width:100%;max-width:250px;z-index:1">
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt2)"><div style="width:5px;height:5px;background:var(--p3);border-radius:50%;flex-shrink:0"></div>Free 14-day trial</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt2)"><div style="width:5px;height:5px;background:var(--p3);border-radius:50%;flex-shrink:0"></div>GDPR & RBI compliant</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt2)"><div style="width:5px;height:5px;background:var(--p3);border-radius:50%;flex-shrink:0"></div>TigerGraph integration</div>
+    </div>
+  </div>
+  <div class="auth-r">
+    <div style="margin-bottom:22px" class="au"><h2 style="font-size:20px;font-weight:700;color:var(--white)">Create account</h2><p style="font-size:12px;color:var(--txt3);margin-top:3px">Start detecting fraud today</p></div>
+    <div class="au2">
+      <div class="frow"><div class="fgroup"><label class="flabel">First name</label><input type="text" id="r-fn" placeholder="Riya"></div><div class="fgroup"><label class="flabel">Last name</label><input type="text" id="r-ln" placeholder="Sharma"></div></div>
+      <div class="fgroup"><label class="flabel">Work email</label><input type="email" id="r-em" placeholder="riya@company.com"></div>
+      <div class="fgroup"><label class="flabel">Company</label><input type="text" id="r-co" placeholder="Fintech Corp"></div>
+      <div class="fgroup"><label class="flabel">Password</label><div class="inp-wrap"><input type="password" id="r-pw" placeholder="Min. 8 characters" oninput="chkStr(this.value)"><button class="eye-btn" onclick="tp('r-pw')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div class="str-bar"><div class="str-fill" id="sf" style="width:0;background:var(--danger)"></div></div><div id="sl" style="font-size:10px;color:var(--txt3);margin-top:2px"></div></div>
+      <div class="fgroup"><label class="flabel">Confirm password</label><input type="password" id="r-cp" placeholder="Re-enter password"></div>
+      <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--txt3);margin-bottom:14px;line-height:1.5;cursor:pointer"><input type="checkbox" id="r-tc" style="width:auto;margin-top:2px">I agree to the <span style="color:var(--p3)">Terms</span> and <span style="color:var(--p3)">Privacy Policy</span></label>
+      <button class="bp" style="width:100%;padding:12px;font-size:14px" onclick="doReg()">Create account</button>
+    </div>
+    <div class="sw au3">Already have an account? <span onclick="gp('signin')">Sign in</span></div>
+  </div>
+</div>
+
+<div class="page" id="page-app" style="flex-direction:column">
+  <div style="background:var(--card3);border-bottom:1px solid var(--border);padding:5px 0;overflow:hidden;white-space:nowrap">
+    <div id="ticker" style="display:inline-flex;gap:36px;animation:ticker 28s linear infinite;padding:0 18px"></div>
+  </div>
+  <div class="main-layout">
+    <div class="sidebar">
+      <div class="sb-logo"><div class="sb-logo-sq"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div><span class="sb-logo-txt">FraudShield<span class="sb-ver">v3</span></span></div>
+      <div class="nav-sec">
+        <div class="nav-lbl">Main</div>
+        <div class="ni act" onclick="sw('dashboard',this)"><svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+        <div class="ni" onclick="sw('graph',this)"><svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v3M9.5 17.5L7 16M14.5 17.5L17 16"/></svg>Graph view</div>
+        <div class="ni" onclick="sw('tx',this)"><svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Transactions<span class="nbadge">12</span></div>
+        <div class="ni" onclick="sw('clients',this)"><svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Clients</div>
+        <div class="ni" onclick="sw('analytics',this)"><svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analytics</div>
+        <div class="ni" onclick="sw('heatmap',this)"><svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>Risk heatmap</div>
+      </div>
+      <div class="nav-sec">
+        <div class="nav-lbl">System</div>
+        <div class="ni" onclick="sw('alerts',this)"><svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>Alerts<span class="nbadge">7</span></div>
+        <div class="ni" onclick="sw('watchlist',this)"><svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Watchlist</div>
+        <div class="ni" onclick="sw('settings',this)"><svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</div>
+      </div>
+      <div class="sb-foot">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="uav" id="sbav">AD</div>
+          <div style="flex:1;min-width:0"><div class="un" id="sbnm">Admin</div><div class="ur">Security Analyst</div></div>
+          <button class="lb" onclick="doLogout()" title="Sign out"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <div class="main-c" id="mc">
+
+      <div id="t-dashboard">
+        <div class="topbar"><div><h1>Dashboard</h1><p>Live fraud monitoring — TigerGraph engine</p></div><div class="topbar-r"><button class="nbtn" onclick="sw('alerts',null)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg><span class="ndot"></span></button><div class="live-pill"><span class="live-dot"></span>Live</div></div></div>
+        <div class="sgrid">
+          <div class="sc" style="animation-delay:.04s"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="sc-lbl">Total transactions</div><div class="sc-val" style="color:var(--p4)">14,382</div><div class="sc-ch up">+8.2% this week</div></div><div class="sc-ico" style="background:rgba(155,109,255,.18)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div></div></div>
+          <div class="sc" style="animation-delay:.08s"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="sc-lbl">Fraud detected</div><div class="sc-val" style="color:#FF8888">247</div><div class="sc-ch dn">+14 today</div></div><div class="sc-ico" style="background:rgba(224,85,85,.15)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF8888" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div></div></div>
+          <div class="sc" style="animation-delay:.12s"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="sc-lbl">Active clients</div><div class="sc-val" style="color:#5DEDB5">3,891</div><div class="sc-ch up">+2.1% this week</div></div><div class="sc-ico" style="background:rgba(61,184,130,.12)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5DEDB5" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div></div></div>
+          <div class="sc" style="animation-delay:.16s"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="sc-lbl">Avg risk score</div><div class="sc-val" style="color:#FFD070">62.4</div><div class="sc-ch dn">High risk zone</div></div><div class="sc-ico" style="background:rgba(201,136,26,.13)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD070" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div></div></div>
+        </div>
+        <div class="two-col">
+          <div class="gc"><div class="scan-line"></div><div class="gh"><h3>Transaction network graph</h3><div class="gtb"><button class="tbtn act" onclick="setGM('all',this)">All</button><button class="tbtn" onclick="setGM('fraud',this)">Fraud</button><button class="tbtn" onclick="setGM('cycles',this)">Cycles</button></div></div><canvas id="gc1" style="width:100%;height:360px;display:block"></canvas><div class="gleg"><div class="gli"><div class="gld" style="background:var(--p3)"></div>Client</div><div class="gli"><div class="gld" style="background:#5DEDB5"></div>Account</div><div class="gli"><div class="gld" style="background:#FFD070"></div>Device</div><div class="gli"><div class="gld" style="background:#FF8888"></div>Suspicious</div></div></div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><h3 style="font-size:12px;font-weight:600;color:var(--white)">Live alerts</h3><span class="tag td">7 active</span></div><div id="liveA"></div></div>
+            <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><h3 style="font-size:12px;font-weight:600;color:var(--white)">AI risk gauge</h3><span class="pulse-badge live">Live</span></div><div id="risk-gauge"></div></div>
+          </div>
+        </div>
+        <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h3 style="font-size:12px;font-weight:600;color:var(--white)">Recent suspicious transactions</h3><button class="bo" style="padding:4px 11px;font-size:11px" onclick="sw('tx',null)">View all</button></div><div class="tw-wrap"><table><thead><tr><th>TX ID</th><th>From</th><th>To</th><th>Amount</th><th>Bank route</th><th>Type</th><th>Risk</th><th>Status</th></tr></thead><tbody id="dtx"></tbody></table></div></div>
+      </div>
+
+      <div id="t-graph" style="display:none">
+        <div class="topbar"><div><h1>Graph explorer</h1><p>TigerGraph visual network traversal</p></div></div>
+        <div style="display:grid;grid-template-columns:1fr 270px;gap:14px">
+          <div class="gc" style="display:flex;flex-direction:column"><div class="scan-line"></div><div class="gh"><h3>Live transaction network</h3><div class="gtb"><button class="tbtn" onclick="addNode()">+ Client</button><button class="tbtn" onclick="runDetect()">Run GSQL</button></div></div><canvas id="gc2" style="flex:1;width:100%;min-height:460px;display:block"></canvas><div class="gleg"><div class="gli"><div class="gld" style="background:var(--p3)"></div>Client</div><div class="gli"><div class="gld" style="background:#5DEDB5"></div>Account</div><div class="gli"><div class="gld" style="background:#FFD070"></div>Device</div><div class="gli"><div class="gld" style="background:#FF8888"></div>Fraud</div></div></div>
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <div class="card"><h3 style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:9px">Detection results</h3><div id="detR"><div style="text-align:center;padding:14px;color:var(--txt3);font-size:12px">Run GSQL to see results</div></div></div>
+            <div class="card"><h3 style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:7px">GSQL query log</h3><div id="glog" style="font-size:11px;font-family:monospace;color:var(--p4);line-height:1.9;max-height:160px;overflow-y:auto;background:var(--bg3);padding:8px;border-radius:6px"><div>-- TigerGraph GSQL v3 ready</div><div style="color:var(--txt3)">-- Awaiting queries...</div></div></div>
+            <div class="card"><h3 style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:9px">Graph stats</h3><div id="gstats" style="font-size:12px;color:var(--txt2);line-height:2"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="t-tx" style="display:none">
+        <div class="page-hdr"><div><h2>Transactions</h2><p>All graph-recorded transactions with real bank data</p></div><button class="bp" onclick="toast('Export started','success')">Export CSV</button></div>
+        <div class="filter-bar">
+          <input type="text" placeholder="Search ID, name, amount, IFSC..." id="txs" oninput="fTx()" style="max-width:230px">
+          <select id="txst" onchange="fTx()"><option value="">All status</option><option value="suspicious">Suspicious</option><option value="cleared">Cleared</option><option value="blocked">Blocked</option></select>
+          <select id="txty" onchange="fTx()"><option value="">All types</option><option value="cycle">Cycle</option><option value="device">Multi-device</option><option value="highfreq">High-freq</option><option value="normal">Normal</option></select>
+          <input type="range" min="0" max="100" value="0" id="txr" step="1" oninput="fTx();document.getElementById('txrl').textContent='Risk ≥'+this.value" style="width:90px">
+          <span id="txrl" style="font-size:11px;color:var(--txt3);white-space:nowrap">Risk ≥0</span>
+        </div>
+        <div class="card"><div class="tw-wrap"><table><thead><tr><th>TX ID</th><th>From</th><th>To</th><th>Amount</th><th>IFSC route</th><th>Bank</th><th>Type</th><th>Risk</th><th>Time</th><th>Status</th></tr></thead><tbody id="txb"></tbody></table></div></div>
+      </div>
+
+      <div id="t-clients" style="display:none">
+        <div class="page-hdr"><div><h2>Client nodes</h2><p>All registered clients — real account & bank details</p></div><button class="bp" onclick="openModal()">+ Register client</button></div>
+        <div class="filter-bar" style="margin-bottom:14px">
+          <input type="text" placeholder="Search name, email, PAN, IFSC..." id="cls" oninput="filterClients()" style="max-width:250px">
+          <select id="clst" onchange="filterClients()"><option value="">All status</option><option value="blocked">Blocked</option><option value="suspicious">Suspicious</option><option value="clear">Clear</option></select>
+          <select id="clkyc" onchange="filterClients()"><option value="">All KYC</option><option value="verified">Verified</option><option value="pending">Pending</option><option value="rejected">Rejected</option></select>
+        </div>
+        <div class="ugrid" id="ug"></div>
+      </div>
+
+      <div id="t-analytics" style="display:none">
+        <div class="topbar"><div><h1>Analytics</h1><p>Fraud patterns, trends & bank intelligence</p></div></div>
+        <div class="sgrid" style="margin-bottom:14px">
+          <div class="sc"><div class="sc-lbl">Cycle frauds</div><div class="sc-val" style="color:#FF8888">38</div><div class="sc-ch dn">+5 this week</div></div>
+          <div class="sc"><div class="sc-lbl">Device sharing</div><div class="sc-val" style="color:#FFD070">91</div><div class="sc-ch dn">+12 this week</div></div>
+          <div class="sc"><div class="sc-lbl">High-frequency</div><div class="sc-val" style="color:var(--p4)">118</div><div class="sc-ch up">-3 this week</div></div>
+          <div class="sc"><div class="sc-lbl">Detection rate</div><div class="sc-val" style="color:#5DEDB5">94.2%</div><div class="sc-ch up">+1.4%</div></div>
+        </div>
+        <div class="agrid">
+          <div class="ccrd"><h3>Fraud detected over time</h3><div style="position:relative;height:190px"><canvas id="ch1"></canvas></div></div>
+          <div class="ccrd"><h3>Fraud type breakdown</h3><div style="display:flex;gap:7px;margin-bottom:6px;font-size:11px;color:var(--txt3);flex-wrap:wrap"><span style="display:flex;align-items:center;gap:3px"><span style="width:7px;height:7px;border-radius:2px;background:#FF8888;display:inline-block"></span>Cycle 15%</span><span style="display:flex;align-items:center;gap:3px"><span style="width:7px;height:7px;border-radius:2px;background:#FFD070;display:inline-block"></span>Device 37%</span><span style="display:flex;align-items:center;gap:3px"><span style="width:7px;height:7px;border-radius:2px;background:var(--p3);display:inline-block"></span>High-freq 48%</span></div><div style="position:relative;height:164px"><canvas id="ch2"></canvas></div></div>
+          <div class="ccrd"><h3>TX volume by hour</h3><div style="position:relative;height:190px"><canvas id="ch3"></canvas></div></div>
+          <div class="ccrd"><h3>Risk score distribution</h3><div style="position:relative;height:190px"><canvas id="ch4"></canvas></div></div>
+        </div>
+        <div class="ccrd" style="margin-bottom:14px"><h3>Top flagged banks this week</h3><div id="bank-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px"></div></div>
+      </div>
+
+      <div id="t-heatmap" style="display:none">
+        <div class="topbar"><div><h1>Risk heatmap</h1><p>Transaction risk by hour × day — darker = higher fraud density</p></div></div>
+        <div class="card" style="margin-bottom:16px">
+          <div style="margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <h3 style="font-size:13px;font-weight:600;color:var(--white)">Weekly fraud heatmap</h3>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt3)">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(155,109,255,.1)"></span>Low
+              <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(155,109,255,.4)"></span>Med
+              <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#FF8888"></span>High
+            </div>
+          </div>
+          <div id="hm-wrap" style="overflow-x:auto"></div>
+        </div>
+        <div class="agrid">
+          <div class="ccrd"><h3>Highest risk hours</h3><div id="top-hours" style="margin-top:4px"></div></div>
+          <div class="ccrd"><h3>Lowest risk days</h3><div id="low-days" style="margin-top:4px"></div></div>
+        </div>
+      </div>
+
+      <div id="t-alerts" style="display:none">
+        <div class="page-hdr"><div><h2>Alert center</h2><p>Real-time fraud detection alerts</p></div><button class="bo" onclick="clrAlerts()">Mark all read</button></div>
+        <div id="allA"></div>
+      </div>
+
+      <div id="t-watchlist" style="display:none">
+        <div class="topbar"><div><h1>Watchlist</h1><p>High-risk clients under active monitoring</p></div><button class="bp" onclick="toast('Watchlist exported','success')">Export list</button></div>
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <h3 style="font-size:13px;font-weight:600;color:var(--white)">Active surveillance</h3>
+            <span class="pulse-badge alert">3 critical</span>
+          </div>
+          <div class="tw-wrap"><table><thead><tr><th>Client</th><th>PAN</th><th>Account no.</th><th>IFSC</th><th>Bank</th><th>Risk score</th><th>Reason</th><th>Since</th><th>Action</th></tr></thead><tbody id="wlb"></tbody></table></div>
+        </div>
+        <div class="agrid">
+          <div class="ccrd"><h3>Watchlist by risk tier</h3><div id="wl-tiers" style="margin-top:8px"></div></div>
+          <div class="ccrd"><h3>Recent watchlist activity</h3><div id="wl-act" style="margin-top:4px"></div></div>
+        </div>
+      </div>
+
+      <div id="t-settings" style="display:none">
+        <div class="topbar"><div><h1>Settings</h1><p>Configure fraud detection system</p></div></div>
+        <div class="set-layout">
+          <div class="set-nav">
+            <div class="sni act" onclick="setSec('general',this)">General</div>
+            <div class="sni" onclick="setSec('detection',this)">Detection</div>
+            <div class="sni" onclick="setSec('database',this)">Database</div>
+            <div class="sni" onclick="setSec('account',this)">Account</div>
+          </div>
+          <div class="set-con">
+            <div id="ss-general">
+              <div class="ss"><h3>System preferences</h3>
+                <div class="sr"><div class="sr-info"><strong>Real-time monitoring</strong><span>Process transactions as they arrive</span></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+                <div class="sr"><div class="sr-info"><strong>Email notifications</strong><span>Send fraud alerts via email</span></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+                <div class="sr"><div class="sr-info"><strong>Auto-block suspicious</strong><span>Block high-risk transactions automatically</span></div><div class="tog" onclick="this.classList.toggle('on')"></div></div>
+                <div class="sr"><div class="sr-info"><strong>Watchlist auto-enroll</strong><span>Add 90+ risk clients to watchlist</span></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+              </div>
+              <div class="ss"><h3>Thresholds</h3>
+                <div class="fgroup"><label class="flabel">Risk score threshold</label><div style="display:flex;align-items:center;gap:10px"><input type="range" min="0" max="100" value="70" step="1" oninput="this.nextElementSibling.textContent=this.value"><span style="font-size:13px;color:var(--txt2);min-width:24px">70</span></div></div>
+                <div class="fgroup"><label class="flabel">Max TX per hour</label><input type="number" value="50" style="max-width:110px"></div>
+              </div>
+            </div>
+            <div id="ss-detection" style="display:none">
+              <div class="ss"><h3>Detection algorithms</h3>
+                <div class="sr"><div class="sr-info"><strong>Cycle detection</strong><span>Detect money loops A→B→C→A</span></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+                <div class="sr"><div class="sr-info"><strong>Device sharing</strong><span>Multiple accounts on same device/IP</span></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+                <div class="sr"><div class="sr-info"><strong>High-frequency detection</strong><span>Flag rapid transaction bursts</span></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+                <div class="sr"><div class="sr-info"><strong>Multi-hop traversal (3+)</strong><span>Analyze deep connection chains</span></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+                <div class="sr"><div class="sr-info"><strong>IFSC anomaly detection</strong><span>Flag suspicious bank routing patterns</span></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+                <div class="sr"><div class="sr-info"><strong>AI risk scoring</strong><span>Neural net risk score per transaction</span></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+              </div>
+            </div>
+            <div id="ss-database" style="display:none">
+              <div class="ss"><h3>TigerGraph connection</h3>
+                <div class="fgroup"><label class="flabel">Host</label><input type="text" value="localhost"></div>
+                <div class="frow"><div class="fgroup"><label class="flabel">Port</label><input type="text" value="14240"></div><div class="fgroup"><label class="flabel">Graph name</label><input type="text" value="FraudGraph"></div></div>
+                <div class="fgroup"><label class="flabel">Secret key</label><input type="password" value="••••••••••••"></div>
+                <button class="bp" style="margin-top:6px" onclick="toast('Connection successful!','success')">Test connection</button>
+              </div>
+            </div>
+            <div id="ss-account" style="display:none">
+              <div class="ss"><h3>Profile</h3>
+                <div class="frow"><div class="fgroup"><label class="flabel">First name</label><input type="text" id="set-fn" value="Admin"></div><div class="fgroup"><label class="flabel">Last name</label><input type="text" value="User"></div></div>
+                <div class="fgroup"><label class="flabel">Email</label><input type="email" value="admin@fraudshield.io"></div>
+                <button class="bp" onclick="toast('Profile updated','success')">Save changes</button>
+              </div>
+              <div class="ss"><h3>Change password</h3>
+                <div class="fgroup"><label class="flabel">Current password</label><input type="password" placeholder="••••••••"></div>
+                <div class="fgroup"><label class="flabel">New password</label><input type="password" placeholder="••••••••"></div>
+                <button class="bp" onclick="toast('Password updated','success')">Update password</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const TX=[
+  {id:'TXN-20240401-8821',from:'Priya Sharma',to:'Rahul Mehta',amount:'₹4,20,000',ifsc:'HDFC0001234→ICIC0002345',bank:'HDFC→ICICI',type:'cycle',risk:91,time:'2m ago',status:'suspicious'},
+  {id:'TXN-20240401-8820',from:'Rahul Mehta',to:'Anjali Singh',amount:'₹3,85,000',ifsc:'ICIC0002345→AXIS0003456',bank:'ICICI→Axis',type:'cycle',risk:88,time:'3m ago',status:'suspicious'},
+  {id:'TXN-20240401-8819',from:'Anjali Singh',to:'Priya Sharma',amount:'₹4,10,000',ifsc:'AXIS0003456→HDFC0001234',bank:'Axis→HDFC',type:'cycle',risk:94,time:'5m ago',status:'blocked'},
+  {id:'TXN-20240401-8815',from:'Vikram Nair',to:'Sunita Patel',amount:'₹75,000',ifsc:'SBIN0004567→PUNB0005678',bank:'SBI→PNB',type:'device',risk:72,time:'12m ago',status:'suspicious'},
+  {id:'TXN-20240401-8810',from:'Deepak Joshi',to:'Meena Rao',amount:'₹9,99,999',ifsc:'YESB0007890→KOTAK006789',bank:'Yes→Kotak',type:'highfreq',risk:85,time:'18m ago',status:'blocked'},
+  {id:'TXN-20240401-8809',from:'Arjun Tiwari',to:'Kavita Gupta',amount:'₹12,000',ifsc:'CNRB0008901→BARB0009012',bank:'Canara→BoB',type:'normal',risk:12,time:'22m ago',status:'cleared'},
+  {id:'TXN-20240401-8805',from:'Neha Kulkarni',to:'Suresh Iyer',amount:'₹3,40,000',ifsc:'UTIB0010123→SBIN0004567',bank:'Axis→SBI',type:'device',risk:68,time:'30m ago',status:'suspicious'},
+  {id:'TXN-20240401-8800',from:'Rohit Desai',to:'Pooja Verma',amount:'₹8,900',ifsc:'HDFC0001234→HDFC0001234',bank:'HDFC→HDFC',type:'normal',risk:8,time:'45m ago',status:'cleared'},
+  {id:'TXN-20240401-8795',from:'Smita Bose',to:'Amit Saxena',amount:'₹5,50,000',ifsc:'ICIC0002345→YESB0007890',bank:'ICICI→Yes',type:'highfreq',risk:79,time:'1h ago',status:'blocked'},
+  {id:'TXN-20240401-8790',from:'Rajesh Kumar',to:'Divya Malhotra',amount:'₹20,000',ifsc:'SBIN0004567→SBIN0004567',bank:'SBI→SBI',type:'normal',risk:15,time:'2h ago',status:'cleared'},
+  {id:'TXN-20240401-8785',from:'Farhan Sheikh',to:'Kiran Reddy',amount:'₹2,20,000',ifsc:'PUNB0005678→AXIS0003456',bank:'PNB→Axis',type:'cycle',risk:82,time:'2h ago',status:'suspicious'},
+  {id:'TXN-20240401-8780',from:'Shruti Agarwal',to:'Manish Yadav',amount:'₹45,000',ifsc:'KOTAK006789→CNRB0008901',bank:'Kotak→Canara',type:'normal',risk:5,time:'3h ago',status:'cleared'},
+];
+
+const CLIENTS=[
+  {name:'Priya Sharma',email:'priya.sharma@gmail.com',phone:'+91 98101 23456',initials:'PS',txns:142,risk:91,status:'blocked',acc:'3765 0012 3456 7890',accFull:'37650012345678905',ifsc:'HDFC0001234',bank:'HDFC Bank',branch:'Connaught Place, New Delhi',atype:'Current',pan:'ABCPS1234F',aadhaar:'8765 4321 0987',kyc:'verified',city:'New Delhi',ip:'103.25.146.20',device:'iOS-A1B2C3D4',dob:'12-Mar-1991',micr:'110240001'},
+  {name:'Rahul Mehta',email:'rahul.mehta@outlook.com',phone:'+91 91234 56789',initials:'RM',txns:98,risk:88,status:'suspicious',acc:'4821 5678 9012 3456',accFull:'48215678901234564',ifsc:'ICIC0002345',bank:'ICICI Bank',branch:'Bandra West, Mumbai',atype:'Savings',pan:'BCPRM2345G',aadhaar:'7654 3210 9876',kyc:'pending',city:'Mumbai',ip:'103.25.147.31',device:'Android-B2C3D4E5',dob:'5-Jul-1988',micr:'400229001'},
+  {name:'Anjali Singh',email:'anjali.singh@yahoo.com',phone:'+91 87654 32109',initials:'AS',txns:201,risk:94,status:'blocked',acc:'5503 6789 0123 4567',accFull:'55036789012345675',ifsc:'AXIS0003456',bank:'Axis Bank',branch:'Koramangala, Bengaluru',atype:'Savings',pan:'CDQAS3456H',aadhaar:'6543 2109 8765',kyc:'rejected',city:'Bengaluru',ip:'103.25.148.42',device:'iOS-C3D4E5F6',dob:'22-Nov-1993',micr:'560211001'},
+  {name:'Vikram Nair',email:'vikram.nair@protonmail.com',phone:'+91 76543 21098',initials:'VN',txns:55,risk:72,status:'suspicious',acc:'6234 7890 1234 5678',accFull:'62347890123456786',ifsc:'SBIN0004567',bank:'State Bank of India',branch:'MG Road, Hyderabad',atype:'Savings',pan:'DERVN4567I',aadhaar:'5432 1098 7654',kyc:'verified',city:'Hyderabad',ip:'49.36.72.15',device:'Android-D4E5F6G7',dob:'17-Feb-1985',micr:'500002001'},
+  {name:'Deepak Joshi',email:'deepak.joshi@gmail.com',phone:'+91 65432 10987',initials:'DJ',txns:320,risk:85,status:'blocked',acc:'7845 8901 2345 6789',accFull:'78458901234567897',ifsc:'YESB0007890',bank:'Yes Bank',branch:'Sector 17, Chandigarh',atype:'Current',pan:'EFSDJ5678J',aadhaar:'4321 0987 6543',kyc:'pending',city:'Chandigarh',ip:'122.177.90.33',device:'iOS-E5F6G7H8',dob:'9-Aug-1980',micr:'160002001'},
+  {name:'Arjun Tiwari',email:'arjun.tiwari@email.com',phone:'+91 54321 09876',initials:'AT',txns:12,risk:12,status:'clear',acc:'1234 9012 3456 7890',accFull:'12349012345678901',ifsc:'CNRB0008901',bank:'Canara Bank',branch:'Juhu, Mumbai',atype:'Savings',pan:'FGUAT6789K',aadhaar:'3210 9876 5432',kyc:'verified',city:'Mumbai',ip:'117.196.33.12',device:'iOS-F6G7H8I9',dob:'3-May-1996',micr:'400015001'},
+  {name:'Neha Kulkarni',email:'neha.kulkarni@gmail.com',phone:'+91 43210 98765',initials:'NK',txns:89,risk:68,status:'suspicious',acc:'2345 0123 4567 8901',accFull:'23450123456789012',ifsc:'UTIB0010123',bank:'Axis Bank (UTIB)',branch:'Whitefield, Bengaluru',atype:'Current',pan:'GHVNK7890L',aadhaar:'2109 8765 4321',kyc:'verified',city:'Bengaluru',ip:'49.36.72.88',device:'Android-G7H8I9J0',dob:'28-Sep-1990',micr:'560211002'},
+  {name:'Sunita Patel',email:'sunita.patel@rediffmail.com',phone:'+91 32109 87654',initials:'SP',txns:44,risk:30,status:'clear',acc:'3456 1234 5678 9012',accFull:'34561234567890123',ifsc:'PUNB0005678',bank:'Punjab National Bank',branch:'Fort, Mumbai',atype:'Savings',pan:'HIWSP8901M',aadhaar:'1098 7654 3210',kyc:'verified',city:'Mumbai',ip:'117.196.44.55',device:'Web-Browser',dob:'14-Jan-1987',micr:'400003001'},
+];
+
+const ALERTS=[
+  {type:'critical',title:'Money cycle detected — 3 hop',desc:'Priya Sharma → Rahul Mehta → Anjali Singh → Priya Sharma · ₹12,15,000 across HDFC/ICICI/Axis',time:'2m ago'},
+  {type:'critical',title:'High-frequency burst',desc:'Deepak Joshi: 47 transactions in 8 min from Yes Bank Chandigarh · threshold exceeded by 840%',time:'5m ago'},
+  {type:'warning',title:'Device sharing — 5 accounts',desc:'IP 103.25.146.20 linked to Priya Sharma, Rahul Mehta, Anjali Singh · possible fraud ring',time:'12m ago'},
+  {type:'critical',title:'Structuring pattern blocked',desc:'₹9,99,999 — Deepak Joshi via YESB0007890 · just below ₹10L reporting limit',time:'18m ago'},
+  {type:'warning',title:'Multi-device access',desc:'Vikram Nair: 3 devices (iOS + Android + Web) in 2h · SBIN0004567 Hyderabad branch',time:'30m ago'},
+  {type:'info',title:'TigerGraph GSQL completed',desc:'3-hop traversal: 38 suspicious edges · cycle subgraph size 7 · avg fraud score 87.3',time:'1h ago'},
+  {type:'warning',title:'Suspicious IFSC routing',desc:'Farhan Sheikh: 4 IFSC codes in single session — HDFC/ICICI/SBI/Axis · common mule pattern',time:'2h ago'},
+];
+
+const WATCHLIST=[
+  {name:'Priya Sharma',pan:'ABCPS1234F',acc:'••••7890',ifsc:'HDFC0001234',bank:'HDFC Bank',risk:91,reason:'3-hop cycle + device share',since:'2 days ago'},
+  {name:'Anjali Singh',pan:'CDQAS3456H',acc:'••••4567',ifsc:'AXIS0003456',bank:'Axis Bank',risk:94,reason:'Cycle fraud + rejected KYC',since:'5 days ago'},
+  {name:'Deepak Joshi',pan:'EFSDJ5678J',acc:'••••6789',ifsc:'YESB0007890',bank:'Yes Bank',risk:85,reason:'High-freq + structuring',since:'1 day ago'},
+  {name:'Rahul Mehta',pan:'BCPRM2345G',acc:'••••3456',ifsc:'ICIC0002345',bank:'ICICI Bank',risk:88,reason:'Cycle participant + pending KYC',since:'2 days ago'},
+  {name:'Neha Kulkarni',pan:'GHVNK7890L',acc:'••••8901',ifsc:'UTIB0010123',bank:'Axis (UTIB)',risk:68,reason:'Device sharing pattern',since:'1 week ago'},
+];
+
+function gp(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+p).classList.add('active');}
+function sw(name,el){
+  document.querySelectorAll('[id^="t-"]').forEach(t=>t.style.display='none');
+  document.getElementById('t-'+name).style.display='block';
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('act'));
+  if(el)el.classList.add('act');
+  if(name==='analytics')setTimeout(initCharts,60);
+  if(name==='graph'){setTimeout(initG2,60);renderGStats();}
+  if(name==='heatmap')renderHeatmap();
+  if(name==='watchlist')renderWatchlist();
+}
+function tp(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
+function chkStr(v){
+  const f=document.getElementById('sf'),l=document.getElementById('sl');
+  if(!v){f.style.width='0';l.textContent='';return;}
+  let s=0;if(v.length>=8)s+=25;if(/[A-Z]/.test(v))s+=25;if(/[0-9]/.test(v))s+=25;if(/[^A-Za-z0-9]/.test(v))s+=25;
+  f.style.width=s+'%';f.style.background=s<=25?'#E05555':s<=50?'#C9881A':s<=75?'var(--p3)':'#3DB882';
+  l.textContent=s<=25?'Weak':s<=50?'Fair':s<=75?'Good':'Strong';l.style.color=f.style.background;
+}
+let loggedUser={name:'Admin',initials:'AD'};
+function doSignIn(){
+  const e=document.getElementById('si-e').value,p=document.getElementById('si-p').value;
+  if(!e||!p){toast('Please fill all fields','error');return;}
+  const n=e.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  loggedUser={name:n,initials:(n.split(' ').map(x=>x[0]).join('')).toUpperCase().slice(0,2)};
+  document.getElementById('sbnm').textContent=loggedUser.name;
+  document.getElementById('sbav').textContent=loggedUser.initials;
+  toast('Welcome back, '+loggedUser.name+'!','success');
+  gp('app');setTimeout(()=>{initGC();renderAll();buildTicker();},100);
+}
+function doReg(){
+  const fn=document.getElementById('r-fn').value,ln=document.getElementById('r-ln').value;
+  const em=document.getElementById('r-em').value,pw=document.getElementById('r-pw').value;
+  const cp=document.getElementById('r-cp').value,tc=document.getElementById('r-tc').checked;
+  if(!fn||!ln||!em||!pw){toast('Fill all required fields','error');return;}
+  if(pw!==cp){toast('Passwords do not match','error');return;}
+  if(!tc){toast('Please accept the terms','error');return;}
+  loggedUser={name:fn+' '+ln,initials:(fn[0]+ln[0]).toUpperCase()};
+  document.getElementById('sbnm').textContent=loggedUser.name;
+  document.getElementById('sbav').textContent=loggedUser.initials;
+  toast('Account created! Welcome, '+fn+'!','success');
+  gp('app');setTimeout(()=>{initGC();renderAll();buildTicker();},100);
+}
+function doLogout(){toast('Signed out','info');setTimeout(()=>gp('signin'),500);}
+function toast(msg,type='info'){
+  const c=document.getElementById('toasts'),t=document.createElement('div');
+  t.className='toast '+type;
+  const ic=type==='success'?'✓':type==='error'?'✗':'·';
+  const cl=type==='success'?'#5DEDB5':type==='error'?'#FF8888':'var(--p4)';
+  t.innerHTML=`<span style="color:${cl};font-weight:700;font-size:14px">${ic}</span><span>${msg}</span>`;
+  c.appendChild(t);setTimeout(()=>t.remove(),3000);
+}
+
+function buildTicker(){
+  const items=[
+    {txt:'TX-8821 flagged: ₹4.2L HDFC→ICICI',cls:'danger'},
+    {txt:'Cycle fraud: 3-hop ₹12.15L confirmed',cls:'danger'},
+    {txt:'Deepak Joshi: 47 TX/8min blocked',cls:'danger'},
+    {txt:'TigerGraph scan: 38 suspicious edges',cls:'watch'},
+    {txt:'Arjun Tiwari: TX cleared ₹12,000',cls:'ok'},
+    {txt:'Rohit Desai: HDFC→HDFC normal ₹8,900',cls:'ok'},
+    {txt:'IP 103.25.146.20: 5 accounts linked',cls:'danger'},
+    {txt:'KYC rejected: Anjali Singh AXIS0003456',cls:'watch'},
+    {txt:'Risk engine: avg score 62.4 today',cls:'watch'},
+    {txt:'Sunita Patel cleared — low risk 30',cls:'ok'},
+  ];
+  const doubled=[...items,...items];
+  document.getElementById('ticker').innerHTML=doubled.map(i=>`<span class="ticker-item ${i.cls}" style="font-size:11px;color:var(--txt3);display:inline-flex;align-items:center;gap:5px;white-space:nowrap"><span style="width:5px;height:5px;border-radius:50%;background:${i.cls==='danger'?'#FF8888':i.cls==='ok'?'#5DEDB5':'#FFD070'};display:inline-block;flex-shrink:0"></span><span style="color:${i.cls==='danger'?'#FFB0B0':i.cls==='ok'?'#5DEDB5':'#FFD070'}">${i.txt}</span></span>`).join('');
+}
+
+function txRow(t){
+  const rc=t.risk>80?'#FF8888':t.risk>60?'#FFD070':'#5DEDB5';
+  return `<tr><td style="font-family:monospace;font-size:10px;color:var(--p3)">${t.id}</td><td>${t.from}</td><td>${t.to}</td><td style="font-weight:600;color:var(--white)">${t.amount}</td><td style="font-family:monospace;font-size:10px;color:var(--txt3)">${t.ifsc}</td><td style="font-size:11px;color:var(--txt3)">${t.bank}</td><td><span class="tag ${t.type==='cycle'?'td':t.type==='device'?'ts':t.type==='highfreq'?'tp':'tg'}">${t.type}</span></td><td><div style="display:flex;align-items:center;gap:5px"><span class="risk-mini"><span class="risk-fill" style="width:${t.risk}%;background:${rc}"></span></span><span style="color:${rc};font-weight:600;font-size:11px">${t.risk}</span></div></td><td style="color:var(--txt3);font-size:11px">${t.time}</td><td><span class="tag ${t.status==='blocked'?'td':t.status==='suspicious'?'ts':'tg'}">${t.status}</span></td></tr>`;
+}
+function alertHtml(a,i,full){
+  return `<div class="al-item ${a.type}" style="animation-delay:${i*.06}s">
+    <div class="al-dot ${a.type}"></div>
+    <div style="flex:1"><div class="al-title">${a.title}</div><div class="al-desc">${a.desc}</div></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+      <span style="font-size:10px;color:var(--txt3)">${a.time}</span>
+      ${full?`<button class="bo" style="padding:2px 8px;font-size:10px" onclick="this.closest('.al-item').remove();toast('Alert dismissed','info')">Dismiss</button>`:''}
+    </div>
+  </div>`;
+}
+function renderAll(){
+  document.getElementById('dtx').innerHTML=TX.slice(0,6).map(txRow).join('');
+  document.getElementById('txb').innerHTML=TX.map(txRow).join('');
+  document.getElementById('liveA').innerHTML=ALERTS.slice(0,3).map((a,i)=>alertHtml(a,i,false)).join('');
+  document.getElementById('allA').innerHTML=ALERTS.map((a,i)=>alertHtml(a,i,true)).join('');
+  renderClients();
+  renderRiskGauge();
+  renderBankStats();
+}
+let currentClients=[...CLIENTS];
+function filterClients(){
+  const s=(document.getElementById('cls').value||'').toLowerCase();
+  const st=document.getElementById('clst').value;
+  const kyc=document.getElementById('clkyc').value;
+  currentClients=CLIENTS.filter(c=>{
+    const txt=(c.name+c.email+c.pan+c.ifsc+c.bank).toLowerCase();
+    return(!s||txt.includes(s))&&(!st||c.status===st)&&(!kyc||c.kyc===kyc);
+  });
+  renderClients();
+}
+function renderClients(){
+  document.getElementById('ug').innerHTML=currentClients.map(c=>{
+    const rc=c.risk>80?'#FF8888':c.risk>60?'#FFD070':'#5DEDB5';
+    const avc=c.risk>80?'#A03030':c.risk>60?'#7C5500':'var(--p2)';
+    const masked=c.acc;
+    return `<div class="ucard">
+      <div class="ucard-top">
+        <div style="display:flex;align-items:flex-start;gap:11px">
+          <div class="ucard-av" style="background:${avc}">${c.initials}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;color:var(--white)">${c.name}</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:1px">${c.email}</div>
+            <div style="font-size:11px;color:var(--txt3)">${c.phone}</div>
+            <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">
+              <span class="tag ${c.status==='blocked'?'td':c.status==='suspicious'?'ts':'tg'}">${c.status}</span>
+              <span class="tag ${c.kyc==='verified'?'tg':c.kyc==='pending'?'ts':'td'}">KYC ${c.kyc}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ucard-body">
+        <div class="ucard-row"><span class="ucard-key">Account no.</span><span class="ucard-val" style="color:var(--p4)">${masked}</span></div>
+        <div class="ucard-row"><span class="ucard-key">IFSC code</span><span class="ucard-val" style="color:var(--p3)">${c.ifsc}</span></div>
+        <div class="ucard-row"><span class="ucard-key">Bank & branch</span><span class="ucard-val" style="font-family:inherit;font-size:10px">${c.bank} — ${c.branch}</span></div>
+        <div class="ucard-row"><span class="ucard-key">Account type</span><span class="ucard-val" style="font-family:inherit">${c.atype}</span></div>
+        <div class="ucard-row"><span class="ucard-key">MICR code</span><span class="ucard-val">${c.micr}</span></div>
+        <div class="ucard-row"><span class="ucard-key">PAN card</span><span class="ucard-val">${c.pan}</span></div>
+        <div class="ucard-row"><span class="ucard-key">Aadhaar</span><span class="ucard-val">${c.aadhaar}</span></div>
+        <div class="ucard-row"><span class="ucard-key">Date of birth</span><span class="ucard-val" style="font-family:inherit">${c.dob}</span></div>
+        <div class="ucard-row"><span class="ucard-key">City</span><span class="ucard-val" style="font-family:inherit">${c.city}</span></div>
+        <div class="ucard-row"><span class="ucard-key">IP address</span><span class="ucard-val">${c.ip}</span></div>
+        <div class="ucard-row"><span class="ucard-key">Device</span><span class="ucard-val" style="font-size:10px">${c.device}</span></div>
+        <div class="ucard-row"><span class="ucard-key">Transactions</span><span class="ucard-val" style="font-family:inherit;color:var(--white)">${c.txns}</span></div>
+        <div class="ucard-row" style="border:none;padding-top:7px">
+          <span class="ucard-key">Risk score</span>
+          <span style="display:flex;align-items:center;gap:6px">
+            <span class="risk-mini" style="width:70px"><span class="risk-fill" style="width:${c.risk}%;background:${rc}"></span></span>
+            <span style="font-size:12px;font-weight:700;color:${rc}">${c.risk}/100</span>
+          </span>
+        </div>
+      </div>
+      <div class="ucard-foot">
+        <button class="bo" style="padding:5px 10px;font-size:11px" onclick="toast('Opening ${c.name} profile','info')">Full profile</button>
+        <button class="bo" style="padding:5px 10px;font-size:11px" onclick="toast('Graph tracing ${c.name}','info')">Trace graph</button>
+        <button class="bo" style="padding:5px 10px;font-size:11px;color:#FF8888;border-color:rgba(224,85,85,.3)" onclick="toast('${c.name} flagged for review','error')">Flag</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function fTx(){
+  const s=document.getElementById('txs').value.toLowerCase();
+  const st=document.getElementById('txst').value,ty=document.getElementById('txty').value;
+  const rk=parseInt(document.getElementById('txr').value)||0;
+  document.getElementById('txb').innerHTML=TX.filter(t=>{
+    const txt=(t.id+t.from+t.to+t.amount+t.ifsc+t.bank).toLowerCase();
+    return(!s||txt.includes(s))&&(!st||t.status===st)&&(!ty||t.type===ty)&&t.risk>=rk;
+  }).map(txRow).join('');
+}
+function clrAlerts(){document.getElementById('allA').innerHTML='<div style="text-align:center;padding:32px;color:var(--txt3);font-size:13px">All alerts cleared</div>';toast('All alerts marked read','success');}
+function setSec(n,el){
+  document.querySelectorAll('[id^="ss-"]').forEach(s=>s.style.display='none');
+  document.getElementById('ss-'+n).style.display='block';
+  document.querySelectorAll('.sni').forEach(s=>s.classList.remove('act'));
+  el.classList.add('act');
+}
+function renderRiskGauge(){
+  const rg=document.getElementById('risk-gauge');
+  const score=62;
+  const col=score>75?'#FF8888':score>50?'#FFD070':'#5DEDB5';
+  rg.innerHTML=`<div style="text-align:center;padding:8px 0">
+    <div style="font-size:28px;font-weight:700;color:${col}">${score}</div>
+    <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Network avg risk score</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px">
+      <div style="background:var(--bg3);border-radius:8px;padding:7px;text-align:center"><div style="font-size:14px;font-weight:700;color:#FF8888">38</div><div style="font-size:10px;color:var(--txt3)">Critical</div></div>
+      <div style="background:var(--bg3);border-radius:8px;padding:7px;text-align:center"><div style="font-size:14px;font-weight:700;color:#FFD070">91</div><div style="font-size:10px;color:var(--txt3)">Warning</div></div>
+      <div style="background:var(--bg3);border-radius:8px;padding:7px;text-align:center"><div style="font-size:14px;font-weight:700;color:#5DEDB5">118</div><div style="font-size:10px;color:var(--txt3)">Normal</div></div>
+    </div>
+  </div>`;
+}
+function renderBankStats(){
+  const banks=[
+    {name:'HDFC Bank',flags:42,col:'#FF8888'},{name:'ICICI Bank',flags:38,col:'#FFAA70'},
+    {name:'Axis Bank',flags:31,col:'#FFD070'},{name:'Yes Bank',flags:28,col:'#C9AEFF'},
+    {name:'SBI',flags:19,col:'#7DDDFF'},{name:'PNB',flags:11,col:'#5DEDB5'},
+  ];
+  const el=document.getElementById('bank-stats');
+  if(!el)return;
+  el.innerHTML=banks.map(b=>`<div style="background:var(--bg3);border-radius:9px;padding:10px 13px">
+    <div style="font-size:12px;font-weight:600;color:var(--txt)">${b.name}</div>
+    <div style="font-size:20px;font-weight:700;color:${b.col};margin:2px 0">${b.flags}</div>
+    <div style="height:3px;background:var(--bg4);border-radius:2px"><div style="width:${Math.round(b.flags/42*100)}%;height:100%;background:${b.col};border-radius:2px"></div></div>
+    <div style="font-size:10px;color:var(--txt3);margin-top:3px">flagged transactions</div>
+  </div>`).join('');
+}
+function renderGStats(){
+  const el=document.getElementById('gstats');
+  if(!el)return;
+  el.innerHTML=`<div>Nodes: <span style="color:var(--p4)">12 clients</span></div>
+  <div>Edges: <span style="color:var(--p4)">18 connections</span></div>
+  <div>Fraud edges: <span style="color:#FF8888">7 red links</span></div>
+  <div>Avg degree: <span style="color:var(--p4)">1.5</span></div>
+  <div>Cycle length: <span style="color:#FFD070">3 hops</span></div>`;
+}
+function renderHeatmap(){
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const hours=['00','02','04','06','08','10','12','14','16','18','20','22'];
+  const data={
+    'Mon':[2,1,0,1,5,12,22,28,31,25,18,9],
+    'Tue':[3,1,1,2,6,14,25,32,38,29,20,11],
+    'Wed':[1,0,0,1,4,10,19,26,29,22,16,8],
+    'Thu':[4,2,1,3,7,16,28,35,42,33,24,13],
+    'Fri':[5,3,2,4,9,18,31,40,48,38,28,16],
+    'Sat':[6,4,3,5,8,15,24,30,35,28,22,14],
+    'Sun':[3,2,1,2,5,9,16,20,22,18,13,7],
+  };
+  const max=48;
+  const wrap=document.getElementById('hm-wrap');
+  if(!wrap)return;
+  let html=`<div style="display:flex;gap:4px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:3px;padding-top:20px">
+      ${hours.map(h=>`<div style="font-size:10px;color:var(--txt3);height:22px;display:flex;align-items:center;width:26px;justify-content:flex-end;padding-right:4px">${h}h</div>`).join('')}
+    </div>
+    <div style="display:flex;gap:4px;flex:1">
+      ${days.map(day=>`<div style="flex:1;display:flex;flex-direction:column;gap:3px">
+        <div style="font-size:10px;color:var(--txt3);text-align:center;height:20px;display:flex;align-items:center;justify-content:center">${day}</div>
+        ${data[day].map(v=>{
+          const pct=v/max;
+          const bg=v>35?'#E05555':v>20?`rgba(224,85,85,${Math.round(pct*100)/100})`:v>8?`rgba(155,109,255,${Math.round(pct*100+20)/100})`:v>2?`rgba(155,109,255,0.18)`:`rgba(155,109,255,0.06)`;
+          return `<div class="heatmap-cell" style="height:22px;background:${bg};border-radius:3px;border:1px solid rgba(180,140,255,0.08)" title="${day} ${hours[data[day].indexOf(v)]}:00 — ${v} fraud events"></div>`;
+        }).join('')}
+      </div>`).join('')}
+    </div>
+  </div>`;
+  wrap.innerHTML=html;
+  const topH=document.getElementById('top-hours');
+  if(topH)topH.innerHTML=[{h:'16:00–18:00',v:48,day:'Friday'},{h:'14:00–16:00',v:40,day:'Friday'},{h:'12:00–14:00',v:38,day:'Thursday'},{h:'18:00–20:00',v:38,day:'Friday'},{h:'10:00–12:00',v:31,day:'Friday'}].map((r,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(180,140,255,.05)"><div style="font-size:12px;color:var(--txt)">${i+1}. ${r.h}</div><div style="font-size:11px;color:var(--txt3)">${r.day}</div><div style="font-size:13px;font-weight:700;color:#FF8888">${r.v}</div></div>`).join('');
+  const lowD=document.getElementById('low-days');
+  if(lowD)lowD.innerHTML=[{d:'Wednesday',total:89},{d:'Sunday',total:90},{d:'Monday',total:96},{d:'Tuesday',total:140},{d:'Thursday',total:154}].map((r,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(180,140,255,.05)"><div style="font-size:12px;color:var(--txt)">${i+1}. ${r.d}</div><div style="font-size:13px;font-weight:700;color:#5DEDB5">${r.total} events</div></div>`).join('');
+}
+function renderWatchlist(){
+  const el=document.getElementById('wlb');
+  if(el)el.innerHTML=WATCHLIST.map(w=>{
+    const rc=w.risk>80?'#FF8888':w.risk>60?'#FFD070':'#5DEDB5';
+    return `<tr><td>${w.name}</td><td style="font-family:monospace">${w.pan}</td><td style="font-family:monospace;color:var(--p4)">${w.acc}</td><td style="font-family:monospace;color:var(--p3);font-size:11px">${w.ifsc}</td><td>${w.bank}</td><td><span style="font-weight:700;color:${rc}">${w.risk}</span></td><td style="font-size:11px">${w.reason}</td><td style="color:var(--txt3)">${w.since}</td><td><button class="bo" style="padding:3px 8px;font-size:10px" onclick="toast('${w.name} reviewed','info')">Review</button></td></tr>`;
+  }).join('');
+  const tiers=[{lbl:'Critical (85+)',count:3,col:'#FF8888'},{lbl:'High (70–84)',count:1,col:'#FFAA70'},{lbl:'Watch (55–69)',count:1,col:'#FFD070'}];
+  const wlt=document.getElementById('wl-tiers');
+  if(wlt)wlt.innerHTML=tiers.map(t=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(180,140,255,.05)"><div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:${t.col};display:inline-block"></span><span style="font-size:12px;color:var(--txt)">${t.lbl}</span></div><span style="font-size:15px;font-weight:700;color:${t.col}">${t.count}</span></div>`).join('');
+  const wla=document.getElementById('wl-act');
+  if(wla)wla.innerHTML=[{txt:'Anjali Singh — new cycle TX blocked',time:'4m ago',col:'#FF8888'},{txt:'Deepak Joshi — 3rd device detected',time:'22m ago',col:'#FFAA70'},{txt:'Priya Sharma — HDFC query triggered',time:'1h ago',col:'#FFD070'},{txt:'Rahul Mehta — risk score updated 88→91',time:'3h ago',col:'#FF8888'}].map(a=>`<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid rgba(180,140,255,.05)"><div style="width:4px;background:${a.col};border-radius:2px;flex-shrink:0"></div><div style="flex:1"><div style="font-size:11px;color:var(--txt)">${a.txt}</div><div style="font-size:10px;color:var(--txt3)">${a.time}</div></div></div>`).join('');
+}
+function openModal(){document.getElementById('addUserModal').classList.add('open');}
+function closeModal(){document.getElementById('addUserModal').classList.remove('open');}
+function submitUser(){
+  const fn=document.getElementById('m-fn').value,ln=document.getElementById('m-ln').value;
+  const em=document.getElementById('m-em').value,ph=document.getElementById('m-ph').value;
+  const acc=document.getElementById('m-acc').value,acc2=document.getElementById('m-acc2').value;
+  const ifsc=document.getElementById('m-ifsc').value,bank=document.getElementById('m-bank').value;
+  if(!fn||!ln||!em||!ph){toast('Fill required personal fields','error');return;}
+  if(!acc||!ifsc||!bank){toast('Fill required bank details','error');return;}
+  if(acc!==acc2){toast('Account numbers do not match','error');return;}
+  const riskTier=document.getElementById('m-risk').value;
+  const riskScore=riskTier==='high'?Math.floor(75+Math.random()*20):riskTier==='medium'?Math.floor(40+Math.random()*30):Math.floor(5+Math.random()*25);
+  const newC={name:fn+' '+ln,email:em,phone:ph,initials:(fn[0]+ln[0]).toUpperCase(),txns:0,risk:riskScore,status:riskTier==='high'?'suspicious':'clear',acc:acc.replace(/(\d{4})/g,'$1 ').trim(),accFull:acc,ifsc:ifsc.toUpperCase(),bank:bank,branch:document.getElementById('m-branch').value||'Main Branch',atype:document.getElementById('m-atype').value,pan:(document.getElementById('m-pan').value||'—').toUpperCase(),aadhaar:document.getElementById('m-aadh').value||'—',kyc:document.getElementById('m-kyc').value,city:'—',ip:document.getElementById('m-ip').value||'—',device:document.getElementById('m-dev').value||'—',dob:'—',micr:document.getElementById('m-micr').value||'—'};
+  CLIENTS.unshift(newC);currentClients=[...CLIENTS];renderClients();closeModal();
+  toast(fn+' '+ln+' registered in TigerGraph','success');
+}
+
+const GN=[
+  {id:0,lbl:'Priya',type:'client',fr:true},{id:1,lbl:'Rahul',type:'client',fr:true},
+  {id:2,lbl:'Anjali',type:'client',fr:true},{id:3,lbl:'Vikram',type:'client',fr:false},
+  {id:4,lbl:'Deepak',type:'client',fr:true},{id:5,lbl:'Arjun',type:'client',fr:false},
+  {id:6,lbl:'Acc-HDFC',type:'account',fr:true},{id:7,lbl:'Acc-ICICI',type:'account',fr:false},
+  {id:8,lbl:'Dev-iOS',type:'device',fr:true},{id:9,lbl:'Dev-And',type:'device',fr:false},
+  {id:10,lbl:'Neha',type:'client',fr:false},{id:11,lbl:'Acc-Yes',type:'account',fr:true},
+].map(n=>({...n,x:0,y:0}));
+const GE=[{a:0,b:1,fr:true},{a:1,b:2,fr:true},{a:2,b:0,fr:true},{a:3,b:8,fr:false},{a:4,b:8,fr:true},{a:5,b:9,fr:false},{a:0,b:6,fr:true},{a:1,b:7,fr:false},{a:10,b:11,fr:false},{a:4,b:11,fr:true},{a:3,b:7,fr:false},{a:5,b:7,fr:false}];
+let gm='all';
+function nodeColor(n){return n.fr?'#FF8888':n.type==='account'?'#5DEDB5':n.type==='device'?'#FFD070':'#B48CFF';}
+function layoutN(nodes,w,h){const r=Math.min(w,h)*.36;nodes.forEach((n,i)=>{const a=(i/nodes.length)*Math.PI*2;n.x=w/2+r*Math.cos(a)+(Math.random()-.5)*40;n.y=h/2+r*Math.sin(a)+(Math.random()-.5)*40;});}
+function drawG(canvas,mode){
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#0A0318';ctx.fillRect(0,0,W,H);
+  const vn=mode==='fraud'?GN.filter(n=>n.fr):GN;
+  const ve=mode==='fraud'?GE.filter(e=>e.fr):mode==='cycles'?GE.filter(e=>[0,1,2].includes(e.a)&&[0,1,2].includes(e.b)):GE;
+  const nm={};vn.forEach(n=>nm[n.id]=n);
+  ve.forEach(e=>{
+    const a=nm[e.a],b=nm[e.b];if(!a||!b)return;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+    ctx.strokeStyle=e.fr?'rgba(255,136,136,0.45)':'rgba(180,140,255,0.18)';ctx.lineWidth=e.fr?2:1;ctx.stroke();
+    const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y,len=Math.sqrt(dx*dx+dy*dy)||1;
+    const nx=dx/len*6,ny=dy/len*6;
+    ctx.beginPath();ctx.moveTo(mx+nx,my+ny);ctx.lineTo(mx-ny*.5+nx*-.5,my+nx*.5+ny*-.5);ctx.lineTo(mx+ny*.5+nx*-.5,my-nx*.5+ny*-.5);
+    ctx.fillStyle=e.fr?'rgba(255,136,136,.6)':'rgba(180,140,255,.4)';ctx.fill();
+  });
+  vn.forEach(n=>{
+    const col=nodeColor(n);
+    if(n.fr){ctx.beginPath();ctx.arc(n.x,n.y,18,0,Math.PI*2);ctx.fillStyle='rgba(255,136,136,.07)';ctx.fill();}
+    ctx.beginPath();ctx.arc(n.x,n.y,10,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+    ctx.beginPath();ctx.arc(n.x,n.y,10,0,Math.PI*2);ctx.strokeStyle=n.fr?'rgba(255,136,136,.45)':'rgba(255,255,255,.1)';ctx.lineWidth=n.fr?2:1;ctx.stroke();
+    ctx.fillStyle='#DDD6FE';ctx.font='9px Segoe UI';ctx.textAlign='center';ctx.fillText(n.lbl,n.x,n.y+22);
+  });
+}
+function setGM(m,btn){gm=m;document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('act'));btn.classList.add('act');drawG(document.getElementById('gc1'),gm);}
+function initGC(){const c=document.getElementById('gc1');if(!c)return;c.width=c.offsetWidth||680;c.height=360;layoutN(GN,c.width,c.height);drawG(c,'all');}
+
+let gn2=[...GN.map(n=>({...n,vx:0,vy:0}))],ge2=[...GE],af=null,nc=12;
+function initG2(){
+  const c=document.getElementById('gc2');if(!c)return;
+  c.width=c.offsetWidth||540;c.height=c.parentElement?c.parentElement.offsetHeight-100:460;
+  if(c.height<200)c.height=460;
+  layoutN(gn2,c.width,c.height);
+  if(af)cancelAnimationFrame(af);
+  function tick(){
+    gn2.forEach(n=>{gn2.forEach(m=>{if(n===m)return;const dx=n.x-m.x,dy=n.y-m.y,d=Math.sqrt(dx*dx+dy*dy)||1;if(d<65){const f=(65-d)/65*.35;n.vx+=dx/d*f;n.vy+=dy/d*f;}});n.vx*=.83;n.vy*=.83;n.x+=n.vx;n.y+=n.vy;n.x=Math.max(16,Math.min(c.width-16,n.x));n.y=Math.max(16,Math.min(c.height-16,n.y));});
+    const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#080115';ctx.fillRect(0,0,c.width,c.height);
+    const nm={};gn2.forEach(n=>nm[n.id]=n);
+    ge2.forEach(e=>{const a=nm[e.a],b=nm[e.b];if(!a||!b)return;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=e.fr?'rgba(255,136,136,.5)':'rgba(180,140,255,.18)';ctx.lineWidth=e.fr?2:1;ctx.stroke();});
+    gn2.forEach(n=>{const col=nodeColor(n);if(n.fr){ctx.beginPath();ctx.arc(n.x,n.y,16,0,Math.PI*2);ctx.fillStyle='rgba(255,136,136,.06)';ctx.fill();}ctx.beginPath();ctx.arc(n.x,n.y,9,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.fillStyle='#DDD6FE';ctx.font='9px Segoe UI';ctx.textAlign='center';ctx.fillText(n.lbl,n.x,n.y+20);});
+    af=requestAnimationFrame(tick);
+  }tick();
+}
+function addNode(){
+  const names=['Sonal','Farhan','Kiran','Amit','Divya','Rajesh'];const types=['client','account','device'];
+  const nm=names[Math.floor(Math.random()*names.length)],ty=types[Math.floor(Math.random()*types.length)],fr=Math.random()>.5;
+  const c=document.getElementById('gc2');
+  gn2.push({id:nc++,lbl:nm,type:ty,fr,x:c?c.width/2+(Math.random()-.5)*150:200,y:c?c.height/2+(Math.random()-.5)*150:200,vx:0,vy:0});
+  const ex=gn2[Math.floor(Math.random()*gn2.length)];
+  ge2.push({a:ex.id,b:nc-1,fr});
+  toast('"'+nm+'" added to graph','info');
+}
+function runDetect(){
+  const log=document.getElementById('glog'),res=document.getElementById('detR');
+  const qs=['SELECT * FROM FraudGraph WHERE hops==3','GSQL: scanning all transaction edges...','Cycle: Priya→Rahul→Anjali→Priya (₹12.15L)','Device cluster: 5 accounts on 103.25.146.20','High-freq: Deepak Joshi (47 TX/8min)','IFSC anomaly: Farhan Sheikh 4-bank session','Structuring: ₹9,99,999 (just below limit)','-- Detection complete: 5 fraud patterns found'];
+  let i=0;log.innerHTML='';
+  const iv=setInterval(()=>{
+    if(i>=qs.length){clearInterval(iv);
+      res.innerHTML=`<div style="margin-bottom:8px"><span class="tag td">Cycle fraud</span><div style="font-size:11px;color:var(--txt2);margin-top:3px">₹12.15L — 3-hop HDFC/ICICI/Axis</div></div><div style="margin-bottom:8px"><span class="tag ts">Device cluster</span><div style="font-size:11px;color:var(--txt2);margin-top:3px">5 clients — IP 103.25.146.20</div></div><div style="margin-bottom:8px"><span class="tag tp">High-frequency</span><div style="font-size:11px;color:var(--txt2);margin-top:3px">Deepak Joshi — 47 TX/8min</div></div><div style="margin-bottom:8px"><span class="tag tw">IFSC anomaly</span><div style="font-size:11px;color:var(--txt2);margin-top:3px">4-bank routing in 1 session</div></div><div><span class="tag td">Structuring</span><div style="font-size:11px;color:var(--txt2);margin-top:3px">₹9,99,999 — below ₹10L threshold</div></div>`;
+      toast('5 fraud patterns detected','success');return;
+    }
+    log.innerHTML+=`<div style="color:${qs[i].startsWith('--')?'#5DEDB5':qs[i].startsWith('GSQL')||qs[i].startsWith('SELECT')?'var(--p4)':'#FFD070'}">${qs[i]}</div>`;
+    log.scrollTop=log.scrollHeight;i++;
+  },500);
+}
+
+let chartsOk=false;
+function initCharts(){
+  if(chartsOk)return;chartsOk=true;
+  const copt={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6B4F9C',font:{size:10}},grid:{color:'rgba(180,140,255,.05)'}},y:{ticks:{color:'#6B4F9C',font:{size:10}},grid:{color:'rgba(180,140,255,.05)'}}}};
+  new Chart(document.getElementById('ch1'),{type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Fraud',data:[12,19,8,24,31,18,22],borderColor:'#FF8888',backgroundColor:'rgba(255,136,136,.07)',tension:.4,fill:true,pointBackgroundColor:'#FF8888'},{label:'Cleared',data:[80,120,95,110,140,105,130],borderColor:'#9B6DFF',backgroundColor:'rgba(155,109,255,.05)',tension:.4,fill:true,pointBackgroundColor:'#9B6DFF'}]},options:copt});
+  new Chart(document.getElementById('ch2'),{type:'doughnut',data:{labels:['Cycle','Device','High-freq'],datasets:[{data:[38,91,118],backgroundColor:['#FF8888','#FFD070','#9B6DFF'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'68%'}});
+  new Chart(document.getElementById('ch3'),{type:'bar',data:{labels:['00','04','08','12','16','20','23'],datasets:[{data:[120,80,340,890,720,560,210],backgroundColor:(ctx)=>ctx.parsed.y>700?'rgba(255,136,136,.7)':'rgba(155,109,255,.55)',borderRadius:4}]},options:copt});
+  new Chart(document.getElementById('ch4'),{type:'bar',data:{labels:['0–20','20–40','40–60','60–80','80–100'],datasets:[{data:[2100,1800,640,380,247],backgroundColor:['rgba(93,237,181,.65)','rgba(93,237,181,.45)','rgba(255,208,112,.6)','rgba(255,136,136,.5)','rgba(255,136,136,.8)'],borderRadius:4}]},options:copt});
+  renderBankStats();
+}
+window.addEventListener('resize',()=>{const c=document.getElementById('gc1');if(c&&c.offsetWidth>100){c.width=c.offsetWidth;c.height=360;layoutN(GN,c.width,c.height);drawG(c,gm);}});
+</script>
